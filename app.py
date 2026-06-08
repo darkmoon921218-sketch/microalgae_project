@@ -84,42 +84,48 @@ elif mode == "📊 Excel分析模式":
 # ======================
 else:
 
-    st.subheader("即時IoT模擬系統")
+    st.subheader("即時 IoT 模擬系統")
 
-    placeholder = st.empty()
+placeholder = st.empty()
+chart_placeholder = st.empty()
 
-    history = []
+history = []
 
-    for i in range(30):
+for i in range(30):
 
-        light = random.randint(60, 100)
-        temp = random.uniform(25, 32)
-        co2 = random.randint(500, 800)
+    light = random.randint(60, 100)
+    temp = random.uniform(25, 32)
+    co2 = random.randint(500, 800)
 
-        efficiency = ai_model(light, temp, co2)
+    efficiency = ai_model(light, temp, co2)
 
-        history.append(efficiency)
+    history.append(efficiency)
 
-        with placeholder.container():
+    # ======================
+    # 即時數據更新（同一區塊）
+    # ======================
+    with placeholder.container():
 
-            col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4 = st.columns(4)
 
-            col1.metric("光照", light)
-            col2.metric("溫度", f"{temp:.1f}")
-            col3.metric("CO₂", co2)
-            col4.metric("效率", f"{efficiency:.2f}%")
+        col1.metric("光照", light)
+        col2.metric("溫度", f"{temp:.1f}")
+        col3.metric("CO₂", co2)
+        col4.metric("效率", f"{efficiency:.2f}%")
 
-            if efficiency > 90:
-                st.success("最佳吸收狀態")
-            elif efficiency > 75:
-                st.warning("中等效率")
-            else:
-                st.error("效率偏低")
+    # ======================
+    # 🔥 重點：更新同一張圖
+    # ======================
+    chart_placeholder.line_chart(history)
 
-        st.line_chart(history)
+    if efficiency > 90:
+        st.success("最佳吸收狀態")
+    elif efficiency > 75:
+        st.warning("中等效率")
+    else:
+        st.error("效率偏低")
 
-        time.sleep(0.8)
-
+    time.sleep(0.8)
 # ======================
 # Sidebar（整合）
 # ======================
