@@ -1,32 +1,30 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import time
 import random
+import time
 
 # ======================
 # 頁面設定
 # ======================
 st.set_page_config(
-    page_title="Sprint 5 - AIoT微藻碳吸收系統",
+    page_title="Sprint 5 AIoT微藻系統",
     page_icon="🌱",
     layout="wide"
 )
 
-st.title("🌱 Sprint 5 - AIoT微藻碳吸收系統")
-
-st.markdown("智慧碳中和園區｜AI + IoT 即時碳吸收監測系統")
+st.title("🌱 AI微藻碳吸收最佳化系統（Sprint 5）")
 
 # ======================
-# 模式切換
+# 模式切換（整合 Sprint 3 + 4 + 5）
 # ======================
 mode = st.radio(
     "選擇模式",
-    ["📊 歷史資料模式 (Excel)", "📡 IoT即時模擬模式"]
+    ["🎛️ 互動控制模式", "📊 Excel分析模式", "📡 IoT即時模式"]
 )
 
 # ======================
-# AI簡易模型（可替換成ML）
+# AI模型（Sprint 5升級）
 # ======================
 def ai_model(light, temp, co2):
     return (
@@ -36,13 +34,30 @@ def ai_model(light, temp, co2):
     ) / 1.7
 
 # ======================
-# 📊 模式1：歷史資料
+# 🎛️ Sprint 3：互動模式
 # ======================
-if mode == "📊 歷史資料模式 (Excel)":
+if mode == "🎛️ 互動控制模式":
 
-    st.subheader("📂 上傳歷史資料")
+    st.subheader("互動環境控制")
 
-    uploaded_file = st.file_uploader("上傳 Excel", type=["xlsx"])
+    light = st.slider("光照強度", 0, 100, 80)
+    temp = st.slider("溫度", 10, 40, 28)
+    co2 = st.slider("CO₂濃度", 300, 1000, 600)
+
+    efficiency = ai_model(light, temp, co2)
+    co2_absorption = efficiency / 100 * 10
+
+    st.metric("AI預測效率", f"{efficiency:.2f}%")
+    st.metric("CO₂吸收量", f"{co2_absorption:.2f} kg")
+
+# ======================
+# 📊 Sprint 4：Excel分析模式
+# ======================
+elif mode == "📊 Excel分析模式":
+
+    st.subheader("歷史資料分析")
+
+    uploaded_file = st.file_uploader("上傳Excel", type=["xlsx"])
 
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
@@ -51,60 +66,47 @@ if mode == "📊 歷史資料模式 (Excel)":
 
     df.columns = df.columns.str.strip()
 
-    st.subheader("📊 歷史資料")
     st.dataframe(df)
 
-    # 找 Efficiency
+    # 找 efficiency
     eff_col = [c for c in df.columns if "eff" in c.lower() or "效率" in c][0]
-
-    st.subheader("📈 效率趨勢")
-    if "日期" in df.columns:
-        df["日期"] = pd.to_datetime(df["日期"])
-        st.line_chart(df.set_index("日期")[eff_col])
 
     best = df.loc[df[eff_col].idxmax()]
 
-    st.subheader("🏆 最佳條件")
+    st.subheader("最佳環境")
 
-    for col in df.columns:
-        if col != eff_col:
-            st.write(f"{col}：{best[col]}")
+    st.write(best)
 
-    st.write(f"Efficiency：{best[eff_col]:.2f}%")
+    st.line_chart(df[eff_col])
 
 # ======================
-# 📡 模式2：IoT即時模擬
+# 📡 Sprint 5：IoT即時模式
 # ======================
 else:
 
-    st.subheader("📡 即時 IoT 感測模擬")
+    st.subheader("即時IoT模擬系統")
 
     placeholder = st.empty()
-    chart_placeholder = st.line_chart([])
 
     history = []
 
-    for i in range(50):
+    for i in range(30):
 
-        # 模擬IoT數據
         light = random.randint(60, 100)
         temp = random.uniform(25, 32)
         co2 = random.randint(500, 800)
 
         efficiency = ai_model(light, temp, co2)
 
-        history.append([light, temp, co2, efficiency])
+        history.append(efficiency)
 
-        df_live = pd.DataFrame(history, columns=["Light", "Temp", "CO2", "Efficiency"])
-
-        # 即時畫面
         with placeholder.container():
 
             col1, col2, col3, col4 = st.columns(4)
 
-            col1.metric("光照", f"{light}")
-            col2.metric("溫度", f"{temp:.1f}°C")
-            col3.metric("CO₂", f"{co2}")
+            col1.metric("光照", light)
+            col2.metric("溫度", f"{temp:.1f}")
+            col3.metric("CO₂", co2)
             col4.metric("效率", f"{efficiency:.2f}%")
 
             if efficiency > 90:
@@ -114,13 +116,12 @@ else:
             else:
                 st.error("效率偏低")
 
-        chart_placeholder.line_chart(df_live.set_index(pd.Index(range(len(df_live))))["Efficiency"])
+        st.line_chart(history)
 
-        time.sleep(1)
+        time.sleep(0.8)
 
 # ======================
-# Sidebar
+# Sidebar（整合）
 # ======================
 st.sidebar.title("系統資訊")
-st.sidebar.write("Sprint 5 - AIoT版本")
-st.sidebar.write("AI + IoT + Dashboard")
+st.sidebar.write("AI + IoT + Excel + Dashboard")
