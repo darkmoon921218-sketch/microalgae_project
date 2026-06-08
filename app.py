@@ -12,7 +12,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🌱 AI微藻碳吸收最佳化系統（Sprint 5）")
+st.title("🌱 AI微藻碳吸收最佳化系統")
 
 st.markdown("""
 本系統整合 AI + IoT + Excel 分析，
@@ -24,7 +24,7 @@ st.markdown("""
 # ======================
 st.sidebar.title("系統資訊")
 st.sidebar.write("AI微藻碳吸收系統")
-st.sidebar.write("Sprint 5 完整版本")
+st.sidebar.write("AIoT DashBoard")
 
 # ======================
 # AI 模型
